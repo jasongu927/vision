@@ -25,7 +25,7 @@ compare_hists(int* histal, int* histb, int* result){
 */
 
 typedef struct{
-	char name[50];
+	char name[100];
 	int ssd;
 }img_ssd;
  
@@ -67,9 +67,9 @@ int calculate_SSD(cv::Mat &comp, cv::Mat &source, int N){
 
 float compare_SSD(char* comparison_photo, cv::Mat &source_pixels){
 	cv::Mat comp_pixels = cv::imread(comparison_photo);
-	//std::cout << "comparing photo " << comparison_photo << std::endl;
+	std::cout << "comparing photo " << comparison_photo << std::endl;
 	float ssd = calculate_SSD(comp_pixels, source_pixels, KERNEL_SIZE);
-	//std::cout <<"finished comparing" << std::endl;
+	std::cout <<"finished comparing" << std::endl;
 	return ssd;
 }
 
@@ -96,8 +96,8 @@ int traverse_directory(char* dirname, char* sourceFile, int topN){
 				strstr(dp->d_name, ".ppm") ||
 				strstr(dp->d_name, ".tif") ) {
 				img_ssd pair;// = new(img_ssd);
-				strcpy(pair.name, dp->d_name);
-				pair.ssd = compare_SSD(dp->d_name, src);
+				sprintf(pair.name, "%s/%s", dirname, dp->d_name);
+				pair.ssd = compare_SSD(pair.name, src);
 				ssds.push_back(pair);
 		}
 	}
