@@ -58,6 +58,10 @@ float GREENESS (cv::Mat &comp, cv::Mat &source){
 				sum_greeness_src += getGreenRatio(src_pix);
 		}
 	}
+		float norm_sum_greeness_comp = sum_greeness_comp/(compX * compY);
+	float norm_sum_greeness_src = sum_greeness_src/(srcX * srcY);
+
+	return std::abs(norm_sum_greeness_src - norm_sum_greeness_comp);
 }
 //task 3 create concentric squares of influence for histogram compairson
 double multi_layerHIST(cv::Mat &comp, cv::Mat &source, int layers){
