@@ -15,6 +15,37 @@ bool compare(const img_metric &a, const img_metric &b){
 	return a.metric < b.metric;
 }
 
+void sobel_gradient(cv::Mat& src, cv::Mat& dest){
+	
+	cv::Mat kernx = (cv::Mat_<char>(3,3) << -1, 0, 1,
+						-2, 0, 2,
+						-1, 0 , 1);
+
+	cv::Mat kerny = (cv::Mat_<char>(3,3) << -1, -2, -1,
+						0, 0, 0,
+						1, 2 , 1);	
+
+
+	cv::Mat tmpx;
+	cv::Mat tmpy;
+
+	cv::filter2D(src, tmpx, src.depth(), kernx);
+	cv::filter2D(src, tmpy, src.depth(), kerny);
+
+	dest.create(src.size(), src.type());
+
+	auto ity = tmpy.begin<cv::Vec3b>();
+	auto itx = tmpx.begin<cv::Vec3b>();
+	for( auto it = dest.begin<cv::Vec3b>(); it != dest.end<cv::Vec3b>(); ++it){
+
+		(*it)[0] = atan((*itx)[0]/(*ity)[0]);
+		(*it)[1] = atan((*itx)[2]/(*ity)[0]);
+		(*it)[2] = atan((*itx)[2]/(*ity)[0]);
+		itx++;
+		ity++;
+	}
+}
+
 int SSD(cv::Mat &comp, cv::Mat &source, int N){
 
 	int comp_midx = comp.cols/2;
