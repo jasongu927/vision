@@ -21,7 +21,7 @@ int TASK2(char* dirname, char* sourceFile, int topN){
 	}
 	
 
-	std::vector<img_ssd> ssds;
+	std::vector<img_metric> ssds;
 	//std::cout <<"starting loop" <<std::endl;	
 	cv::Mat src = cv::imread(sourceFile);
 	color_hist* src_hist = make_hist_from_image(src);
@@ -31,7 +31,7 @@ int TASK2(char* dirname, char* sourceFile, int topN){
 				strstr(dp->d_name, ".png") ||
 				strstr(dp->d_name, ".ppm") ||
 				strstr(dp->d_name, ".tif") ) {
-				img_metric pair;// = new(img_ssd);
+				img_metric pair;// = new(img_metric);
 				sprintf(pair.name, "%s/%s", dirname, dp->d_name);
 				cv::Mat comp_image = cv::imread(pair.name);
 				color_hist* comp_hist = make_hist_from_image(comp_image);
@@ -47,7 +47,7 @@ int TASK2(char* dirname, char* sourceFile, int topN){
 	delete(src_hist);
 	//std::cout << "finished loop" << std::endl;
 	
-	std::sort(ssds.begin(), ssds.end(), compareImage_SSDs);
+	std::sort(ssds.begin(), ssds.end(), compare);
 	for(int i = 0; i < topN; i++){
 		std::cout << "name is " << ssds[i].name << std::endl;
 	}
