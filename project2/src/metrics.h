@@ -34,3 +34,5 @@ color_hist* make_hist_from_image(cv::Mat& src);
 color_hist* compare_hists(color_hist* src, color_hist* compare);
 
 int hist_ssd(color_hist* src);
+
+void sobel_gradient(cv::Mat& src, cv::Mat& dest);
