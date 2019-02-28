@@ -58,6 +58,7 @@ float GREENESS (cv::Mat &comp, cv::Mat &source){
 				sum_greeness_src += getGreenRatio(src_pix);
 		}
 	}
+}
 //task 3 create concentric squares of influence for histogram compairson
 double multi_layerHIST(cv::Mat &comp, cv::Mat &source, int layers){
 	int comp_midx = comp.cols/2;
