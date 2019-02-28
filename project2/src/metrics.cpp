@@ -14,10 +14,11 @@
 bool compare(const img_metric &a, const img_metric &b){
 	return a.metric < b.metric;
 }
-nt getYellowRatio(cv::Vec3b pixel){
-	int b = comp_pix[0]; 
-	int g = comp_pix[1]; 
-	int r = comp_pix[2]; 
+
+int getYellowRatio(cv::Vec3b pixel){
+	int b = pixel[0]; 
+	int g = pixel[1]; 
+	int r = pixel[2]; 
 	int yellowness = (r + g)/b;
 	int ratio = yellowness/(r+b+g);
 	return ratio;
