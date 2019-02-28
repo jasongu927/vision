@@ -99,10 +99,10 @@ void sobel_gradient(cv::Mat& src, cv::Mat& dest){
 	auto ity = tmpy.begin<cv::Vec3b>();
 	auto itx = tmpx.begin<cv::Vec3b>();
 	for( auto it = dest.begin<cv::Vec3b>(); it != dest.end<cv::Vec3b>(); ++it){
-
-		(*it)[0] = atan((*itx)[0]/(*ity)[0]);
-		(*it)[1] = atan((*itx)[2]/(*ity)[0]);
-		(*it)[2] = atan((*itx)[2]/(*ity)[0]);
+		// add 1 to prevent divide by 0 errors
+		(*it)[0] = atan((*itx)[0]/(1 + (*ity)[0]));
+		(*it)[1] = atan((*itx)[1]/(1 + (*ity)[1]));
+		(*it)[2] = atan((*itx)[2]/(1 + (*ity)[2]));
 		itx++;
 		ity++;
 	}
