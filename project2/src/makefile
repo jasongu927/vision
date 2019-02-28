@@ -39,6 +39,12 @@ task2: task2.o metrics.o
 
 task3: task3.o metrics.o
 	$(CC) $^ -o $(BINDIR)/$@ $(LDFLAGS) $(LDLIBS)	
+
+task4: task4.o metrics.o
+	$(CC) $^ -o $(BINDIR)/$@ $(LDFLAGS) $(LDLIBS)	
+
+task5: task5.o metrics.o
+	$(CC) $^ -o $(BINDIR)/$@ $(LDFLAGS) $(LDLIBS)	
 	
 clean:
 	rm -f *.o *~ 
