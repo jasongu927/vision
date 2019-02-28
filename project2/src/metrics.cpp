@@ -14,6 +14,67 @@
 bool compare(const img_metric &a, const img_metric &b){
 	return a.metric < b.metric;
 }
+nt getYellowRatio(cv::Vec3b pixel){
+	int b = comp_pix[0]; 
+	int g = comp_pix[1]; 
+	int r = comp_pix[2]; 
+	int yellowness = (r + g)/b;
+	int ratio = yellowness/(r+b+g);
+	return ratio;
+}
+
+
+int YELLOWNESS (cv::Mat &comp, cv::Mat &source){
+	int compX = comp.cols;
+	int compY = comp.rows;
+	int srcX = source.cols;
+	int srcY = source.rows;
+
+	int sum_yellowness_comp = 0;
+	int sum_yellowness_src = 0;
+
+	for (int i = 0; i < compX; i++){
+		for (int j = 0; j < compY; j++){
+				cv::Vec3b comp_pix = comp.at<cv::Vec3b>(cv::Point(i, j));
+				sum_yellowness_comp += getYellowRatio(comp_pix);
+
+
+		}
+	}
+	for (int i = 0; i < srcX; i++){
+		for (int j = 0; j < srcY; j++){
+				cv::Vec3b src_pix = source.at<cv::Vec3b>(cv::Point(i, j));
+				sum_yellowness_src += getYellowRatio(src_pix);
+
+	
+		}
+	}
+	return sum_yellowness_comp/sum_yellowness_src;
+}
+
+//task 3 create concentric squares of influence for histogram compairson
+double multi_layerHIST(cv::Mat &comp, cv::Mat &source, int layers){
+	int comp_midx = comp.cols/2;
+	int comp_midy = comp.rows/2;
+	int src_midx = source.cols/2;
+	int src_midy = source.rows/2;
+	double result = 0;
+	int scale = 1;
+	for(int i = 0; i < layers; i++){
+		int comp_scalex = comp_midx/(scale);
+		int comp_scaley = comp_midy/(scale);
+		int src_scalex = src_midx/(scale);
+		int src_scaley = src_midy/(scale);
+		cv::Mat subsection_comp (comp, cv::Rect(comp_midx - comp_scalex, comp_midy - comp_scaley,
+											comp_midx + comp_scalex, comp_midy + comp_scaley));
+		
+		cv::Mat subsection_src (source, cv::Rect(src_midx - src_scalex, src_midy - src_scaley,
+											src_midx + src_scalex, src_midy + src_scaley));
+		result += HIST(subsection_comp, subsection_src);
+		scale *= 2;
+	}
+	return result;
+}
 
 void sobel_gradient(cv::Mat& src, cv::Mat& dest){
 	
