@@ -44,9 +44,9 @@ void standard_chromaticize(cv::Mat& src);
 
 double HIST(cv::Mat &comp, cv::Mat &source);
 
-double HIST2D(cv::Mat &comp, cv::Mat &source);
+float getGreenRatio(cv::Vec3b pixel);
 
-int getYellowRatio(cv::Vec3b pixel);
+float GREENESS (cv::Mat &comp, cv::Mat &source);
 
 int YELLOWNESS (cv::Mat &comp, cv::Mat &source);
 
