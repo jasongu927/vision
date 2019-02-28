@@ -15,44 +15,49 @@ bool compare(const img_metric &a, const img_metric &b){
 	return a.metric < b.metric;
 }
 
-int getYellowRatio(cv::Vec3b pixel){
+
+float getGreenRatio(cv::Vec3b pixel){
 	int b = pixel[0]; 
 	int g = pixel[1]; 
 	int r = pixel[2]; 
-	int yellowness = (r + g)/b;
-	int ratio = yellowness/(r+b+g);
+	if (b == 0){
+		b = 1;
+	}
+	if (g == 0){
+		g =1 ;
+	}
+	if (r == 0){
+		r = 1;
+	}
+	float greeness = g;
+	float ratio = greeness/(r+b+g);
 	return ratio;
 }
 
 
-int YELLOWNESS (cv::Mat &comp, cv::Mat &source){
+float GREENESS (cv::Mat &comp, cv::Mat &source){
+
 	int compX = comp.cols;
 	int compY = comp.rows;
 	int srcX = source.cols;
 	int srcY = source.rows;
 
-	int sum_yellowness_comp = 0;
-	int sum_yellowness_src = 0;
+	float sum_greeness_comp = 0;
+	float sum_greeness_src = 0;
 
 	for (int i = 0; i < compX; i++){
 		for (int j = 0; j < compY; j++){
 				cv::Vec3b comp_pix = comp.at<cv::Vec3b>(cv::Point(i, j));
-				sum_yellowness_comp += getYellowRatio(comp_pix);
-
-
+				sum_greeness_comp += getGreenRatio(comp_pix);
 		}
 	}
+
 	for (int i = 0; i < srcX; i++){
 		for (int j = 0; j < srcY; j++){
 				cv::Vec3b src_pix = source.at<cv::Vec3b>(cv::Point(i, j));
-				sum_yellowness_src += getYellowRatio(src_pix);
-
-	
+				sum_greeness_src += getGreenRatio(src_pix);
 		}
 	}
-	return sum_yellowness_comp/sum_yellowness_src;
-}
-
 //task 3 create concentric squares of influence for histogram compairson
 double multi_layerHIST(cv::Mat &comp, cv::Mat &source, int layers){
 	int comp_midx = comp.cols/2;
