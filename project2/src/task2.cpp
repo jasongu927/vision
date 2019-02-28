@@ -1,7 +1,7 @@
 /*
 	Jason Gurevitch and Douglas Abrams
 	Project 2
-	Task 2 (extension)
+	Task 2 (with extension)
 */
 #include <cstdio>
 #include <cstdlib>
@@ -24,6 +24,7 @@ int TASK2(char* dirname, char* sourceFile, int topN){
 	std::vector<img_metric> ssds;
 	//std::cout <<"starting loop" <<std::endl;	
 	cv::Mat src = cv::imread(sourceFile);
+	standard_chromaticize(src);
 
 	while( (dp = readdir(dirp)) != NULL){ // read the next image
 		//std::cout <<"in loop" << std::endl;
@@ -34,7 +35,8 @@ int TASK2(char* dirname, char* sourceFile, int topN){
 				img_metric pair;// = new(img_metric);
 				sprintf(pair.name, "%s/%s", dirname, dp->d_name);
 				cv::Mat comp = cv::imread(pair.name);
-				pair.metric = HIST(comp , src);
+				standard_chromaticize(comp);
+				pair.metric = HIST(comp, src);
 
 
 				ssds.push_back(pair);
@@ -78,6 +80,7 @@ int TASK2_homemadeHist(char* dirname, char* sourceFile, int topN){
 				color_hist* comp_hist = make_hist_from_image(comp_image);
 				color_hist* diff_hist = compare_hists(src_hist, comp_hist);
 				pair.metric = hist_ssd(diff_hist);
+
 				//pair.ssd = compare_SSD(pair.name, src);
 				ssds.push_back(pair);
 				delete(comp_hist);
