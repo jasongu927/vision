@@ -158,7 +158,7 @@ void standard_chromaticize(cv::Mat& src){
 
 //task 2
 //almost all code taken from OpenCV documentation
-double HIST(cv::Mat &comp, cv::Mat &source){
+double HIST2D(cv::Mat &comp, cv::Mat &source){
     int RGBbin = 32;
 	int histSize[] = {RGBbin, RGBbin};
     float RGBrange[] = { 0, 256 };
@@ -181,6 +181,34 @@ double HIST(cv::Mat &comp, cv::Mat &source){
 
 	double metric = cv::compareHist(src, compared, 1);
 
+	return metric;
+}
+
+double HIST(cv::Mat &comp, cv::Mat &source){
+    int RGBbin = 32;
+	int histSize[] = {RGBbin};
+    float RGBrange[] = { 0, 256 };
+
+    const float* ranges[] = { RGBrange};
+    cv::MatND src;
+    cv::MatND compared;
+
+	double metric = 0;
+	for(int i = 0; i < 3; i++){
+		int channels[] = {i};
+		cv::calcHist( &comp, 1, channels, cv::Mat(), // do not use mask
+				 compared, 1, histSize, ranges,
+				 true, // the histogram is uniform
+				 false );
+
+		cv::calcHist( &source, 1, channels, cv::Mat(), // do not use mask
+				 src, 1, histSize, ranges,
+				 true, // the histogram is uniform
+				 false );
+	
+
+	 metric += cv::compareHist(src, compared, 1);
+	}
 	return metric;
 }
 
