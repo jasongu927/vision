@@ -24,6 +24,47 @@ int TASK2(char* dirname, char* sourceFile, int topN){
 	std::vector<img_metric> ssds;
 	//std::cout <<"starting loop" <<std::endl;	
 	cv::Mat src = cv::imread(sourceFile);
+
+	while( (dp = readdir(dirp)) != NULL){ // read the next image
+		//std::cout <<"in loop" << std::endl;
+		if( strstr(dp->d_name, ".jpg") ||
+				strstr(dp->d_name, ".png") ||
+				strstr(dp->d_name, ".ppm") ||
+				strstr(dp->d_name, ".tif") ) {
+				img_metric pair;// = new(img_metric);
+				sprintf(pair.name, "%s/%s", dirname, dp->d_name);
+				cv::Mat comp = cv::imread(pair.name);
+				pair.metric = HIST(comp , src);
+
+
+				ssds.push_back(pair);
+
+		}
+	}
+	
+	std::sort(ssds.begin(), ssds.end(), compare);
+	for(int i = 0; i < topN; i++){
+		std::cout << "name is " << ssds[i].name << std::endl;
+	}
+	
+	closedir(dirp);
+	return(1);	
+} 
+
+int TASK2_homemadeHist(char* dirname, char* sourceFile, int topN){
+	DIR *dirp;
+	struct dirent *dp;
+	
+	dirp = opendir(dirname);
+	if( dirp == NULL){
+		std::cout << "directory does not exist" << std::endl;
+		return(-1);
+	}
+	
+
+	std::vector<img_metric> ssds;
+	//std::cout <<"starting loop" <<std::endl;	
+	cv::Mat src = cv::imread(sourceFile);
 	color_hist* src_hist = make_hist_from_image(src);
 	while( (dp = readdir(dirp)) != NULL){ // read the next image
 		//std::cout <<"in loop" << std::endl;
