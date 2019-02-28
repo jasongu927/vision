@@ -46,6 +46,39 @@ int SSD(cv::Mat &comp, cv::Mat &source, int N){
 	}
 	return ssd;
 }
+//task 2
+//almost all code taken from OpenCV documentation
+double HIST(cv::Mat &comp, cv::Mat &source){
+	std::cout << "in hist" << std::endl;
+    int RGBbin = 32;
+	int histSize[] = {RGBbin, RGBbin};
+    float RGBrange[] = { 0, 256 };
+
+    const float* ranges[] = { RGBrange, RGBrange };
+    cv::MatND src;
+	cv::MatND compared;
+
+    int channels[] = {0, 1};
+	std::cout << "calculating first hist " << std::endl;
+    cv::calcHist( &comp, 1, channels, cv::Mat(), // do not use mask
+             compared, 2, histSize, ranges,
+             true, // the histogram is uniform
+             false );
+	std::cout<< "compared is " << std::endl;
+	std::cout << compared << std::endl;
+	cv::calcHist( &source, 1, channels, cv::Mat(), // do not use mask
+             src, 2, histSize, ranges,
+             true, // the histogram is uniform
+             false );
+	
+	std::cout << "dirt" << std::endl;
+
+	double metric = cv::compareHist(src, compared, 2);
+	std::cout << "dirt" << std::endl;
+
+	return metric;
+}
+
 
 //extensions
 // use our own histograms instead of OpenCV ones
