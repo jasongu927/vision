@@ -57,6 +57,8 @@ int TASK1(char* dirname, char* sourceFile, int topN){
 
 
 int main(int argc, char *argv[]) {
+			std::cout << "please supply a filename and a directory" << std::endl;
+
 	char filename[256];
 	char dirname[256];
     int topN;

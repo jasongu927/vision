@@ -16,7 +16,7 @@ bool compare(const img_metric &a, const img_metric &b){
 }
 
 
-float getGreenRatio(cv::Vec3b pixel){
+float getColorRatio(cv::Vec3b pixel, char colorOfInteret){
 	int b = pixel[0]; 
 	int g = pixel[1]; 
 	int r = pixel[2]; 
@@ -29,8 +29,16 @@ float getGreenRatio(cv::Vec3b pixel){
 	if (r == 0){
 		r = 1;
 	}
-	float greeness = g;
-	float ratio = greeness/(r+b+g);
+	float ratio;
+	if (colorOfInteret ==  'g'){
+		ratio = g/(r+b+g);
+	}else if (colorOfInteret == 'r'){
+		ratio = r/(r+b+g);
+	}else if (colorOfInteret ==  'b'){
+		ratio = b/(r+b+g);
+	}else{
+		ratio = g/(r+b+g);
+	}
 	return ratio;
 }
 
@@ -48,14 +56,14 @@ float GREENESS (cv::Mat &comp, cv::Mat &source){
 	for (int i = 0; i < compX; i++){
 		for (int j = 0; j < compY; j++){
 				cv::Vec3b comp_pix = comp.at<cv::Vec3b>(cv::Point(i, j));
-				sum_greeness_comp += getGreenRatio(comp_pix);
+				sum_greeness_comp += getColorRatio(comp_pix, 'g');
 		}
 	}
 
 	for (int i = 0; i < srcX; i++){
 		for (int j = 0; j < srcY; j++){
 				cv::Vec3b src_pix = source.at<cv::Vec3b>(cv::Point(i, j));
-				sum_greeness_src += getGreenRatio(src_pix);
+				sum_greeness_src += getColorRatio(src_pix, 'g');
 		}
 	}
 		float norm_sum_greeness_comp = sum_greeness_comp/(compX * compY);
@@ -63,6 +71,71 @@ float GREENESS (cv::Mat &comp, cv::Mat &source){
 
 	return std::abs(norm_sum_greeness_src - norm_sum_greeness_comp);
 }
+
+float extensionMetric (cv::Mat &comp, cv::Mat &source){
+
+	int compX = comp.cols;
+	int compY = comp.rows;
+	int srcX = source.cols;
+	int srcY = source.rows;
+
+	float sum_greeness_comp = 0;
+	float sum_blueness_comp = 0;
+	float sum_redness_comp = 0;
+
+	float sum_greeness_src = 0;
+	float sum_blueness_src = 0;
+	float sum_redness_src = 0;
+
+	for (int i = 0; i < compX; i++){
+		for (int j = 0; j < compY; j++){
+				cv::Vec3b comp_pix = comp.at<cv::Vec3b>(cv::Point(i, j));
+				sum_greeness_comp += getColorRatio(comp_pix, 'g');
+				sum_blueness_comp += getColorRatio(comp_pix, 'b');
+				sum_redness_comp += getColorRatio(comp_pix, 'r');
+		}
+	}
+
+	for (int i = 0; i < srcX; i++){
+		for (int j = 0; j < srcY; j++){
+				cv::Vec3b src_pix = source.at<cv::Vec3b>(cv::Point(i, j));
+				sum_greeness_src += getColorRatio(src_pix, 'g');
+				sum_blueness_src += getColorRatio(src_pix, 'b');
+				sum_redness_src += getColorRatio(src_pix, 'r');
+
+		}
+	}
+	float norm_sum_greeness_comp = sum_greeness_comp/(compX * compY);
+	float norm_sum_blueness_comp = sum_blueness_comp/(compX * compY);
+	float norm_sum_redness_comp = sum_redness_comp/(compX * compY);
+
+	float norm_sum_greeness_src = sum_greeness_src/(srcX * srcY);
+	float norm_sum_blueness_src = sum_blueness_src/(srcX * srcY);
+	float norm_sum_redness_src = sum_redness_src/(srcX * srcY);
+
+	float greenDiff = std::abs(norm_sum_greeness_src - norm_sum_greeness_comp);
+	float blueDiff = std::abs(norm_sum_blueness_comp - norm_sum_blueness_src);
+	float redDiff = std::abs(norm_sum_redness_comp - norm_sum_redness_src);
+	
+	if (greenDiff < blueDiff){
+		if ( greenDiff < redDiff){
+			return greenDiff;
+		}
+		else {
+			return redDiff;
+		}
+	}
+	else{
+		if (blueDiff < redDiff){
+			return blueDiff;
+		}
+		else{
+			return redDiff;
+		}
+	}
+
+}
+
 //task 3 create concentric squares of influence for histogram compairson
 double multi_layerHIST(cv::Mat &comp, cv::Mat &source, int layers){
 	int comp_midx = comp.cols/2;

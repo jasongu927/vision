@@ -37,9 +37,9 @@ int TASK3(char* dirname, char* sourceFile, int topN){
 
 				cv::Mat comp = cv::imread(pair.name);
 				cv::Mat comp_grad;
-				pair.metric = HIST(comp , src); //this is normalized space
+				pair.metric = multi_layerHIST(comp , src, 5); //this is normalized space
 				sobel_gradient(comp, comp_grad);
-				pair.metric += HIST(comp_grad, src_grad);				
+				pair.metric += multi_layerHIST(comp_grad, src_grad, 5);				
 				
 
 				ssds.push_back(pair);
