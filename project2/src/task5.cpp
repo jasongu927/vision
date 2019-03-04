@@ -36,7 +36,9 @@ int TASK5(char* dirname, char* sourceFile, int topN){
 				img_metric pair;// = new(img_metric);
 				sprintf(pair.name, "%s/%s", dirname, dp->d_name);
 				cv::Mat comp = cv::imread(pair.name);
-				pair.metric = GREENESS(comp , src);
+				pair.metric = extensionMetric(comp , src);
+				//std::cout << pair.metric << std::endl;
+
 				ssds.push_back(pair);
 
 		}
@@ -44,7 +46,7 @@ int TASK5(char* dirname, char* sourceFile, int topN){
 	
 	std::sort(ssds.begin(), ssds.end(), compare);
 
-	for(int i = 0; i < 15; i++){
+	for(int i = 0; i < 50; i++){
 		std::cout << "name is " << ssds[i].name << " number " << ssds[i].metric<< std::endl;
 	}
 	

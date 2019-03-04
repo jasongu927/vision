@@ -17,21 +17,21 @@ bool compare(const img_metric &a, const img_metric &b){
 
 
 float getColorRatio(cv::Vec3b pixel, char colorOfInteret){
-	int b = pixel[0]; 
-	int g = pixel[1]; 
-	int r = pixel[2]; 
+	float b = pixel[0]; 
+	float g = pixel[1]; 
+	float r = pixel[2]; 
 	if (b == 0){
-		b = 1;
+		b = 1.0;
 	}
 	if (g == 0){
-		g =1 ;
+		g = 1.0 ;
 	}
 	if (r == 0){
-		r = 1;
+		r = 1.0;
 	}
 	float ratio;
 	if (colorOfInteret ==  'g'){
-		ratio = g/(r+b+g);
+		ratio = (float)g/(r+b+g);
 	}else if (colorOfInteret == 'r'){
 		ratio = r/(r+b+g);
 	}else if (colorOfInteret ==  'b'){
@@ -66,10 +66,12 @@ float GREENESS (cv::Mat &comp, cv::Mat &source){
 				sum_greeness_src += getColorRatio(src_pix, 'g');
 		}
 	}
-		float norm_sum_greeness_comp = sum_greeness_comp/(compX * compY);
+	float norm_sum_greeness_comp = sum_greeness_comp/(compX * compY);
 	float norm_sum_greeness_src = sum_greeness_src/(srcX * srcY);
 
-	return std::abs(norm_sum_greeness_src - norm_sum_greeness_comp);
+	float diff = std::abs(norm_sum_greeness_src - norm_sum_greeness_comp);
+
+	return diff;
 }
 
 float extensionMetric (cv::Mat &comp, cv::Mat &source){

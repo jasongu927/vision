@@ -15,7 +15,7 @@
 
 typedef struct{
 	char name[100];
-	int metric;
+	float metric;
 }img_metric;
 
 typedef struct{
