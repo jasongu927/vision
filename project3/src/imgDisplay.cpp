@@ -16,6 +16,8 @@
 #include <cstdio>
 #include <opencv2/opencv.hpp>
 #include "metrics.h"
+#include "OR_pipeline.h"
+
 
 
 int main(int argc, char *argv[]) {

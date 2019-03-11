@@ -31,10 +31,10 @@ LDLIBS = -lopencv_core -lopencv_highgui -lopencv_video -lopencv_videoio -lopencv
 
 BINDIR = ../bin
 
-vid: vidDisplay.o metrics.o
+vid: vidDisplay.o OR_pipeline.o
 	$(CC) $^ -o $(BINDIR)/$@ $(LDFLAGS) $(LDLIBS)	
 
-img: imgDisplay.o metrics.o
+img: imgDisplay.o OR_pipeline.o
 	$(CC) $^ -o $(BINDIR)/$@ $(LDFLAGS) $(LDLIBS)	
 
 clean:
