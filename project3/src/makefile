@@ -40,5 +40,8 @@ img: imgDisplay.o OR_pipeline.o database.o
 classImg: classifyImages.o OR_pipeline.o database.o
 	$(CC) $^ -o $(BINDIR)/$@ $(LDFLAGS) $(LDLIBS)
 
+confu: computeConfusionMatrix.o OR_pipeline.o database.o
+	$(CC) $^ -o $(BINDIR)/$@ $(LDFLAGS) $(LDLIBS)
+
 clean:
 	rm -f *.o *~ 
