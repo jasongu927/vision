@@ -114,7 +114,7 @@ std::string classifyKNN(Database * d, Region_features newObjectFeatures, int k){
 
 		float compare_sum = 0;
 		for (int i = 0; i < entry_features.features.size(); i++){
-			float diff= (compare_features[i] - entry_features.features[i]) / d->feature_sds[i];
+			float diff= (compare_features[i] - entry_features.features[i]);
 			compare_sum += diff;
 		}
 		matches.push_back(std::pair <std::string, int>(name, compare_sum));
@@ -150,7 +150,7 @@ int pair_contains(std::string s, std::vector<std::pair<std::string, int>> freque
 }
 
 std::string classify_scaledEuclideanDistance( Database* d, Region_features newObjetFeatures){
-    int min = INT_MAX;
+    float min = INT_MAX;
     std::string min_name;
 
     for (auto it = d->entries.begin(); it != d->entries.end(); ++it){
@@ -163,12 +163,16 @@ std::string classify_scaledEuclideanDistance( Database* d, Region_features newOb
 
         for (int i = 0; i < NUM_FEATURES; i++){
             float diff = (newObjetFeatures.features[i] - entry_features.features[i] - d->feature_mins[i]) / (d->feature_maxs[i] - d->feature_mins[i]);
+            diff *= diff;
             compare_sum += diff;
         }
         if (compare_sum < min){
+                std::cout << "old difference is " << min << std::endl;
+                std::cout << "new difference is " << compare_sum << std::endl;
                 min = compare_sum;
                 min_name = name;
             }
     }
+
     return min_name;
 }

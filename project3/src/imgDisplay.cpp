@@ -80,6 +80,7 @@ int main(int argc, char *argv[]) {
 		 if (k == 'c'){
 			std::cout << "computing feature averages" << std::endl;
 			computeFeatureAverages(d);
+			std::cout <<"\n\n\n\n AVGs: " << d->feature_sds[0] << " " << d->feature_sds[1] << std::endl;
 			std::cout << "classifying" << std::endl;
 			std::string name = classify_scaledEuclideanDistance(d, features[1]);
 			//std::string name = classifyKNN(d, features[1], 5);
