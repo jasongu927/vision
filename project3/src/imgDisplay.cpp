@@ -17,16 +17,16 @@
 #include <opencv2/opencv.hpp>
 #include "metrics.h"
 #include "OR_pipeline.h"
-
+#include "database.h"
 
 
 int main(int argc, char *argv[]) {
 
 	cv::Mat src;
 	char filename[256];
-
+	char csv[256];
 	// usage
-	if(argc < 2) {
+	if(argc < 3) {
 		printf("Usage %s <image filename>\n", argv[0]);
 		exit(-1);
 	}
@@ -41,9 +41,16 @@ int main(int argc, char *argv[]) {
 		exit(-1);
 	}
 
+	//read CSV
+	strcpy(csv, argv[2]);
+
     cv::Mat frame;
     
-    OR_pipeline(src, frame, 110);
+	//import features database
+	Database* d;
+	d = database_read(csv);
+	
+   std::vector<Region_features> features = OR_pipeline(src, 110, true, frame);
 	
 	
 // create a window
@@ -55,7 +62,34 @@ int main(int argc, char *argv[]) {
 	cv::imshow(filename, frame);
 
 	// wait for a key press (indefinitely)
-	cv::waitKey(0);
+	 while(true){ 
+
+	 	char k = (char)cv::waitKey(0);
+	 	if (k == 'n'){
+			char name[256];
+			std::cout << "enter a label" << std::endl;
+			std::cin >> name;
+			std::cout << "adding entry with name " << name << std::endl;
+			Entry e;
+			e.name = std::string(name);
+			e.features = features[1];
+			database_addEntry(e, d);
+			database_write(csv, d);
+	 		break;
+	 	}
+		 if (k == 'c'){
+			std::cout << "computing feature averages" << std::endl;
+			computeFeatureAverages(d);
+			std::cout << "classifying" << std::endl;
+			std::string name = classify_scaledEuclideanDistance(d, features[1]);
+			//std::string name = classifyKNN(d, features[1], 5);
+
+			std::cout << "maching obj : "<< name << std::endl;
+		 }
+		 if(k == 'x' || k == 'q'){
+			 break;
+		 }
+}
 
 	// get rid of the window
 	cv::destroyWindow(filename);
