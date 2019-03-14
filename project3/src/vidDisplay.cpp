@@ -56,7 +56,6 @@ int main(int argc, char *argv[]) {
 		       (int) capdev->get(cv::CAP_PROP_FRAME_HEIGHT));
 
 	printf("Expected size: %d %d\n", refS.width, refS.height);
-
 	cv::namedWindow("Video", 1); // identifies a window?
 	cv::Mat frame;
     cv::Mat src;
@@ -101,12 +100,14 @@ int main(int argc, char *argv[]) {
 			std::cout << "adding entry with name " << name << std::endl;
 			Entry e;
 			e.name = std::string(name);
-			e.features = features[1];
+			e.features = features[0];
 			database_addEntry(e, d);
 		}
 			break;
 		case 'w':
 			database_write(database_name, d);
+			free(d);
+			d = database_read(database_name);
 			break;
 		case 'q':
 		    quit = 1;

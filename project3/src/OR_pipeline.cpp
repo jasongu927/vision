@@ -28,8 +28,8 @@ std::vector<Region_features> OR_pipeline(cv::Mat& src,  int threshold, bool visu
 	//output = tmp.clone();
 	cv::Mat region_id_map;
 	int numRegions = labelRegions(tmp, region_id_map, false);
-	//cv::Mat pretty_output;
-	//labelRegions(tmp, pretty_output, true);
+	cv::Mat pretty_output;
+	labelRegions(tmp, pretty_output, true);
 	//std::cout << "labeled regions" << std::endl;
 	std::vector<std::vector<point>> region_vectors = getRegionVectors(region_id_map, numRegions);
 	region_vectors = std::vector<std::vector<point>>(region_vectors.begin()+1, region_vectors.end());
@@ -74,7 +74,7 @@ std::vector<Region_features> OR_pipeline(cv::Mat& src,  int threshold, bool visu
 	
 	//std::cout << "got region features" << std::endl;
 	if(visualize){
-		drawRegionInformation(src, dest, proper_info); //press x to exit
+		drawRegionInformation(pretty_output, dest, proper_info); //press x to exit
 	} else{
 		dest = src;
 	}
@@ -85,7 +85,7 @@ std::vector<Region_features> OR_pipeline(cv::Mat& src,  int threshold, bool visu
 
 
 void drawRegionInformation(cv::Mat& src, cv::Mat&  dest, std::vector<Region_information>  region_info){
-	//cv::cvtColor(src, src, cv::COLOR_GRAY2RGB);
+	cv::cvtColor(src, src, cv::COLOR_GRAY2RGB);
 	for(auto it = region_info.begin(); it != region_info.end(); ++it){
 			Region_information info = (*it);
 			
@@ -261,13 +261,18 @@ float getBoundingBoxRatio(std::vector<point> region_points, point centroid, floa
 float getSecondOrderMomentAboutCentralAxis(std::vector<point> region_points, float major_axis, point c0){
 	float sum = 0;
 	float minor_axis = major_axis + M_PI/2;
-
 	for (auto it = region_points.begin(); it != region_points.end(); ++it){
 		point p0 = (*it);
-		float tmp = p0.x - c0.x * cos(minor_axis) + p0.y - c0.y * sin(minor_axis); 
-        sum += tmp * tmp;
+		float tmpy = (c0.y - p0.y) * cos(minor_axis);
+		
+		float tmpx = (p0.x - c0.x) * sin(minor_axis); 
+        float tmp = tmpx + tmpy;
+		sum += tmp * tmp;
 	}
-	return sum/ getMoment(0,0, region_points);
+	float N = (float)getMoment(0,0, region_points);
+	sum = sum / N;
+	//printf("%10.1f %10.1f  %10d %10d %10.1f\n", minor_axis, sum, c0.x, c0.y, N);
+	return sum;
 }
 
 int labelRegions(cv::Mat &src, cv::Mat &dest, bool visualize){
