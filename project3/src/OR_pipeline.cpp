@@ -15,24 +15,26 @@
 
 
 std::vector<Region_features> OR_pipeline(cv::Mat& src,  int threshold, bool visualize, cv::Mat& dest){
-	std::cout << "in OR pipeline" << std::endl;
+	//std::cout << "in OR pipeline" << std::endl;
 	cv::Mat grayscaled;
     grayscaleThreshold(src, grayscaled, threshold );
-	std::cout << "grayscaled" << std::endl;
+	//std::cout << "grayscaled" << std::endl;
 	cv::Mat tmp = grayscaled.clone();
 	for (int j = 1; j < 5; j++){
 		erode(tmp, tmp, j , 3, true);
 		dilate(tmp, tmp, j , 3, true);
 	}
-	std::cout << " did morphological processing" << std::endl;
+	//std::cout << " did morphological processing" << std::endl;
 	//output = tmp.clone();
 	cv::Mat region_id_map;
 	int numRegions = labelRegions(tmp, region_id_map, false);
-	cv::Mat pretty_output;
-	labelRegions(tmp, pretty_output, true);
-	std::cout << "labeled regions" << std::endl;
+	//cv::Mat pretty_output;
+	//labelRegions(tmp, pretty_output, true);
+	//std::cout << "labeled regions" << std::endl;
 	std::vector<std::vector<point>> region_vectors = getRegionVectors(region_id_map, numRegions);
-	std::cout << "got region vectors" << std::endl;
+	region_vectors = std::vector<std::vector<point>>(region_vectors.begin()+1, region_vectors.end());
+	numRegions--;
+	//std::cout << "got region vectors" << std::endl;
 	std::vector<Region_information> region_info;
 	for(int i = 0; i < numRegions; i++){
 		Region_information info;
@@ -44,13 +46,22 @@ std::vector<Region_features> OR_pipeline(cv::Mat& src,  int threshold, bool visu
 		info.corners = getOrientedBoundingBoxCorners(region, info.centroid, info.major_axis);
 		region_info.push_back(info);
 	}
-	std::cout << "got region information" << std::endl;
-
+	//std::cout << "got region information" << std::endl;
+	float img_size = src.rows * src.cols;
 	std::vector<Region_features> region_features;
+	std::vector<Region_information> proper_info;
 	for(int i = 0; i < numRegions; i++){
 		Region_features features;
 		Region_information info = region_info[i];
 		std::vector<point> region = region_vectors[i];
+		
+		float area = (info.major_extent * 2) * (info.minor_extent * 2);
+		if(area/img_size < 0.001){
+			continue;
+		}
+		proper_info.push_back(info);
+
+
 		float percentFilled = getPercentFilled(region, info.corners, info.major_extent, info.minor_extent);
 		float boundingBoxRatio = getBoundingBoxRatio(region, info.centroid, info.major_axis);
 		float SecondOrderMomentAboutCentralAxis = getSecondOrderMomentAboutCentralAxis(region, info.major_axis, info.centroid);
@@ -61,20 +72,20 @@ std::vector<Region_features> OR_pipeline(cv::Mat& src,  int threshold, bool visu
 		region_features.push_back(features);
 	}
 	
-	std::cout << "got region features" << std::endl;
+	//std::cout << "got region features" << std::endl;
 	if(visualize){
-		drawRegionInformation(pretty_output, dest, region_info); //press x to exit
+		drawRegionInformation(src, dest, proper_info); //press x to exit
 	} else{
 		dest = src;
 	}
 
-	std::cout << "percent filled " <<  region_features[1].features[0] << " , " << region_features[1].features[1] << " , " << region_features[1].features[2]<< std::endl;
+	//std::cout << "percent filled " <<  region_features[1].features[0] << " , " << region_features[1].features[1] << " , " << region_features[1].features[2]<< std::endl;
 	return region_features;
 }
 
 
 void drawRegionInformation(cv::Mat& src, cv::Mat&  dest, std::vector<Region_information>  region_info){
-	cv::cvtColor(src, src, cv::COLOR_GRAY2RGB);
+	//cv::cvtColor(src, src, cv::COLOR_GRAY2RGB);
 	for(auto it = region_info.begin(); it != region_info.end(); ++it){
 			Region_information info = (*it);
 			
@@ -181,8 +192,8 @@ std::vector<point> getOrientedBoundingBoxCorners(std::vector<point> region_point
 	float minor_extent = getExtent(minor_axis, region_points, centroid);
 
 
-	std::cout << "oriented bounding box has major axis " << major_axis * 180/M_PI << " with extent " << major_extent << std::endl;
-	std::cout << "oriented bounding box has minor axis " << minor_axis * 180/M_PI << " with extent " << minor_extent << std::endl;
+	//std::cout << "oriented bounding box has major axis " << major_axis * 180/M_PI << " with extent " << major_extent << std::endl;
+	//std::cout << "oriented bounding box has minor axis " << minor_axis * 180/M_PI << " with extent " << minor_extent << std::endl;
 	//combine extens to get four corners
 	//return as array of points
 

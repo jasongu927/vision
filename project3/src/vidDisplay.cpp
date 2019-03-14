@@ -19,18 +19,24 @@
 #include "OR_pipeline.h"
 
 
+enum Video_state{
+	WAITING,
+	CLASSIFYING,
+};
+
 int main(int argc, char *argv[]) {
 	cv::VideoCapture *capdev;
 	char label[256];
 	int quit = 0;
 	int frameid = 0;
 	char buffer[256];
+	char database_name[256];
 	std::vector<int> pars;
 
 	pars.push_back(5);
 
-	if( argc < 2 ) {
-	    printf("Usage: %s <label>\n", argv[0]);
+	if( argc < 3 ) {
+	    printf("Usage: %s <label> <database>\n", argv[0]);
 	    exit(-1);
 	}
 
@@ -42,7 +48,10 @@ int main(int argc, char *argv[]) {
 	}
 
 	strcpy(label, argv[1]);
+	strcpy(database_name, argv[2]);
 
+	Database* d;
+	d = database_read(database_name);
 	cv::Size refS( (int) capdev->get(cv::CAP_PROP_FRAME_WIDTH ),
 		       (int) capdev->get(cv::CAP_PROP_FRAME_HEIGHT));
 
@@ -51,7 +60,8 @@ int main(int argc, char *argv[]) {
 	cv::namedWindow("Video", 1); // identifies a window?
 	cv::Mat frame;
     cv::Mat src;
-	
+	Video_state video_state = WAITING;
+
 	for(;!quit;) {
 		*capdev >> src; // get a new frame from the camera, treat as a stream
 
@@ -59,23 +69,48 @@ int main(int argc, char *argv[]) {
 		  printf("frame is empty\n");
 		  break;
 		}
+		std::vector<Region_features> features = OR_pipeline(src, 110, true, frame);
 		
-        OR_pipeline(src, frame, 70);
+		if(video_state == CLASSIFYING){
+			for(int i = 0; i < features.size(); i++){
+				std::string name = classify_scaledEuclideanDistance(d, features[i]);
+				std::cout << "object " << i << " has been classified as " << name << std::endl;
+			} 
+		}
 		cv::imshow("Video", frame);
+
 
 		int key = cv::waitKey(10);
 
 		switch(key) {
+		case 'a':
+			video_state = WAITING;
+			break;
+		case 'c':
+			if (video_state != CLASSIFYING){
+				//std::cout << "computing feature averages" << std::endl;
+				computeFeatureAverages(d);
+				//std::cout <<"wooo" <<std::endl;
+			}
+			video_state = CLASSIFYING;
+			break;
+		case 'n':{
+			char name[256];
+			std::cout << "enter a label" << std::endl;
+			std::cin >> name;
+			std::cout << "adding entry with name " << name << std::endl;
+			Entry e;
+			e.name = std::string(name);
+			e.features = features[1];
+			database_addEntry(e, d);
+		}
+			break;
+		case 'w':
+			database_write(database_name, d);
+			break;
 		case 'q':
 		    quit = 1;
 		    break;
-
-		    
-		// case 't: // capture a photo if the user hits c
-		//     printf("threshoding");
-
-		//     break;
-
 		default:
 		    break;
 		}

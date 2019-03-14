@@ -9,7 +9,7 @@
 #include "opencv2/opencv.hpp"
 #include <string>
 
-#define NUM_FEATURES 2
+#define NUM_FEATURES 3
 
 struct Region_features{
 	std::vector<float> features;

@@ -55,6 +55,8 @@ void database_addEntry(Entry e, Database* d){
 }
 
 void computeFeatureAverages(Database* d){
+   // std::cout << "in compute feature averages" << std::endl;
+    std::vector<float> feature_averages(NUM_FEATURES);
     std::vector<float> feature_sds(NUM_FEATURES);
     std::vector<float> feature_maxes(NUM_FEATURES);
     std::vector<float> feature_mins(NUM_FEATURES);
@@ -62,6 +64,7 @@ void computeFeatureAverages(Database* d){
 
     for(int i = 0; i < NUM_FEATURES; i++){
         feature_sds[i] = 0;
+        feature_averages[i] = 0;
         feature_maxes[i] = INT_MIN;
         feature_mins[i] = INT_MAX;
     } 
@@ -72,7 +75,7 @@ void computeFeatureAverages(Database* d){
         Entry e = d->entries[i];
         for (int j = 0; j < NUM_FEATURES; j++){
             float value = e.features.features[j];
-            feature_sds[j] += value;
+            feature_averages[j] += value;
             if(value > feature_maxes[j]){
                 feature_maxes[j] = value;
             }
@@ -83,11 +86,24 @@ void computeFeatureAverages(Database* d){
         }
     }
     for (int i = 0; i < NUM_FEATURES; i++){
-        feature_sds[i] /= numEntries;
+        feature_averages[i] /= numEntries;
     }
+    //std::cout << "calculated average" << std::endl;
+    for(int i = 0; i < d-> entries.size(); i++){
+        Entry e = d->entries[i];
+        for(int j = 0; j < NUM_FEATURES; j++){
+            float value = e.features.features[j]-feature_averages[j];
+            feature_sds[i] += value*value;
+        }
+    }
+    for(int i = 0; i < NUM_FEATURES; i++){
+        feature_sds[i] = sqrt(feature_sds[i]/d->entries.size());
+    }
+    //std::cout << "calcualted std dev" << std::endl;
     d->feature_sds = feature_sds;
     d->feature_maxs = feature_maxes;
     d->feature_mins = feature_mins;
+    //std::cout << "finished compute feature averages" << std::endl;
 }
 
 bool compareLow(std::pair<std::string, int> a, std::pair<std::string, int> b){
@@ -162,13 +178,15 @@ std::string classify_scaledEuclideanDistance( Database* d, Region_features newOb
         float compare_sum = 0;
 
         for (int i = 0; i < NUM_FEATURES; i++){
-            float diff = (newObjetFeatures.features[i] - entry_features.features[i] - d->feature_mins[i]) / (d->feature_maxs[i] - d->feature_mins[i]);
+            float diff = (newObjetFeatures.features[i] - entry_features.features[i]) /  d->feature_sds[i];
+
+//            float diff = (newObjetFeatures.features[i] - entry_features.features[i] - d->feature_mins[i]) / (d->feature_maxs[i] - d->feature_mins[i]);
             diff *= diff;
             compare_sum += diff;
         }
         if (compare_sum < min){
-                std::cout << "old difference is " << min << std::endl;
-                std::cout << "new difference is " << compare_sum << std::endl;
+                //std::cout << "old difference is " << min << std::endl;
+                //std::cout << "new difference is " << compare_sum << std::endl;
                 min = compare_sum;
                 min_name = name;
             }

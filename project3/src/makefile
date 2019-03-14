@@ -2,7 +2,7 @@
 # CC = clang++
 
 # Dwarf compiler
-CC = g++ -std=c++11
+CC = g++ -std=c++11 -O3
 
 CXX = $(CC)
 
