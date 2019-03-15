@@ -65,7 +65,7 @@ std::vector<Region_features> OR_pipeline(cv::Mat& src,  int threshold, bool visu
 		float percentFilled = getPercentFilled(region, info.corners, info.major_extent, info.minor_extent);
 		float boundingBoxRatio = getBoundingBoxRatio(region, info.centroid, info.major_axis);
 		float SecondOrderMomentAboutCentralAxis = getSecondOrderMomentAboutCentralAxis(region, info.major_axis, info.centroid);
-
+		features.centroid = point(info.centroid.x, info.centroid.y);
 		features.features.push_back(percentFilled);
 		features.features.push_back(boundingBoxRatio);
 		features.features.push_back(SecondOrderMomentAboutCentralAxis);
@@ -74,18 +74,21 @@ std::vector<Region_features> OR_pipeline(cv::Mat& src,  int threshold, bool visu
 	
 	//std::cout << "got region features" << std::endl;
 	if(visualize){
-		drawRegionInformation(pretty_output, dest, proper_info); //press x to exit
+		drawRegionInformation(src, proper_info); //press x to exit
+		dest = src.clone();
 	} else{
-		dest = src;
+		dest = src.clone();
+	}
+	if(dest.empty()){
+		dest = src.clone();
 	}
 
-	//std::cout << "percent filled " <<  region_features[1].features[0] << " , " << region_features[1].features[1] << " , " << region_features[1].features[2]<< std::endl;
 	return region_features;
 }
 
 
-void drawRegionInformation(cv::Mat& src, cv::Mat&  dest, std::vector<Region_information>  region_info){
-	cv::cvtColor(src, src, cv::COLOR_GRAY2RGB);
+void drawRegionInformation(cv::Mat& src, std::vector<Region_information>  region_info){
+	//cv::cvtColor(src, src, cv::COLOR_GRAY2RGB);
 	for(auto it = region_info.begin(); it != region_info.end(); ++it){
 			Region_information info = (*it);
 			
@@ -102,7 +105,6 @@ void drawRegionInformation(cv::Mat& src, cv::Mat&  dest, std::vector<Region_info
 					cv::Point(info.corners[3].x, info.corners[3].y),
 					cv::Scalar(0, 255, 0), 4);*/
 	}
-	dest = src;
 	//arrowedLine(src, Point pt1, Point pt2, const Scalar& color, int thickness=1, int line_type=8, int shift=0, double tipLength=0.1)
 }
 
@@ -268,6 +270,22 @@ float getSecondOrderMomentAboutCentralAxis(std::vector<point> region_points, flo
 		float tmpx = (p0.x - c0.x) * sin(minor_axis); 
         float tmp = tmpx + tmpy;
 		sum += tmp * tmp;
+	}
+	float N = (float)getMoment(0,0, region_points);
+	sum = sum / N;
+	//printf("%10.1f %10.1f  %10d %10d %10.1f\n", minor_axis, sum, c0.x, c0.y, N);
+	return sum;
+}
+
+float getFirstOrderMomentAboutCentralAxis(std::vector<point> region_points, float major_axis, point c0){
+	float sum = 0;
+	float minor_axis = major_axis + M_PI/2;
+	for (auto it = region_points.begin(); it != region_points.end(); ++it){
+		point p0 = (*it);
+		float tmpy = (c0.y - p0.y) * cos(minor_axis);
+		
+		float tmpx = (p0.x - c0.x) * sin(minor_axis); 
+        float tmp = tmpx + tmpy;
 	}
 	float N = (float)getMoment(0,0, region_points);
 	sum = sum / N;

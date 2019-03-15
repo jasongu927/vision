@@ -4,11 +4,10 @@
 #include <fstream>
 #include <string>
 
-Database* database_read(char* filename){
+void database_read(char* filename, Database *d){
     std::ifstream file;
     file.open(filename);
     std::string line;
-    Database* d = new Database;
     while(file.good()){
         Entry e;
         getline(file, line);
@@ -25,7 +24,6 @@ Database* database_read(char* filename){
         d -> entries.push_back(e);
     }
     file.close();
-    return d;
 }
 
 void database_write(char* filename, Database* d){
@@ -42,7 +40,6 @@ void database_write(char* filename, Database* d){
                 file << ",";
             }
         }
-        std::cout << std::endl;
         if(i <  d->entries.size() - 1){
             file << "\n";
         }
@@ -107,37 +104,48 @@ void computeFeatureAverages(Database* d){
 }
 
 bool compareLow(std::pair<std::string, int> a, std::pair<std::string, int> b){
-	return a.second - b.second;
+	return a.second < b.second;
 } 
 
 bool compareHigh(std::pair<std::string, int> a, std::pair<std::string, int> b){
-	return b.second - a.second;
+	return b.second > a.second;
 }
 
 std::string classifyKNN(Database * d, Region_features newObjectFeatures, int k){
+    
     if( k > d->entries.size()){
         std::cout << "there are not enough enteries, using scaled euclidean distance instead" << std::endl;
         return classify_scaledEuclideanDistance(d, newObjectFeatures);
     }
+    
 	std::vector<std::pair<std::string, int>> matches;
 	for ( int j = 0; j < d->entries.size(); j++){
+        
+        //std::cout << d->entries.size()<< j<< std::endl;
 		Entry e = d->entries[j];
 		Region_features entry_features = e.features;
-		std::string name = e.name;
+		std::string name(e.name);
 		
-
+		float compare_sum = 0.0;
+        
 		std::vector<float> compare_features = newObjectFeatures.features;	
 
-		float compare_sum = 0;
 		for (int i = 0; i < entry_features.features.size(); i++){
-			float diff= (compare_features[i] - entry_features.features[i]);
+			float diff= (compare_features[i] - entry_features.features[i]- d->feature_mins[i])/  (d->feature_maxs[i]- d->feature_mins[i]);
+            //std::cout << diff << ',';
+            diff = abs(diff);
 			compare_sum += diff;
 		}
+        //std::cout << std::endl;
+        
 		matches.push_back(std::pair <std::string, int>(name, compare_sum));
-		
+        
+		//matches.push_back(std::pair <std::string, int>("hello", 0.0));
+
 	} 
+    
 	std::sort(matches.begin(), matches.end(), compareLow);
-	
+  // std::cout << matches[0].second << " , " << matches[matches.size()-1].second<< std::endl;
     std::vector<std::pair<std::string, int>> names;
     for(int i = 0; i < k; i++){
         int index = pair_contains(matches[i].first, names);
@@ -145,15 +153,27 @@ std::string classifyKNN(Database * d, Region_features newObjectFeatures, int k){
             std::pair<std::string, int> frequency(matches[i].first, 0);
             names.push_back(frequency);
         }else{
-            names[i].second ++;
+            names[index].second ++;
         }
     }
 
-    std::sort(names.begin(), names.end(), compareHigh);
-
+    int max = 0;
+    int max_index = 0;
+    for(int i = 0; i < names.size(); i++){
+        int freq = names[i].second;
+        if (freq > max){
+            max = freq;
+            max_index = i;
+        }
+    }
+    std::string result = names[max_index].first;
+    
+    //std::sort(names.begin(), names.end(), compareHigh);
+    //std::cout << names[0].second << " , " << names[names.size()-1].second<< std::endl;
     //get top k and most common names
-    return names[0].first;
+    return result;
 	
+   //return std::string("woo");
 }
 
 int pair_contains(std::string s, std::vector<std::pair<std::string, int>> frequencies){
@@ -168,7 +188,7 @@ int pair_contains(std::string s, std::vector<std::pair<std::string, int>> freque
 std::string classify_scaledEuclideanDistance( Database* d, Region_features newObjetFeatures){
     float min = INT_MAX;
     std::string min_name;
-
+    std::cout << "here" << std::endl;
     for (auto it = d->entries.begin(); it != d->entries.end(); ++it){
         Entry e = (*it);
         Region_features entry_features = e.features;
@@ -178,19 +198,21 @@ std::string classify_scaledEuclideanDistance( Database* d, Region_features newOb
         float compare_sum = 0;
 
         for (int i = 0; i < NUM_FEATURES; i++){
-            float diff = (newObjetFeatures.features[i] - entry_features.features[i]) /  d->feature_sds[i];
-
-//            float diff = (newObjetFeatures.features[i] - entry_features.features[i] - d->feature_mins[i]) / (d->feature_maxs[i] - d->feature_mins[i]);
-            diff *= diff;
+            //float diff = (newObjetFeatures.features[i] - entry_features.features[i]) /  d->feature_sds[i];
+			float diff= (newObjetFeatures.features[i] - entry_features.features[i]- d->feature_mins[i])/  (d->feature_maxs[i]- d->feature_mins[i]);
+//           float diff = (newObjetFeatures.features[i] - entry_features.features[i] - d->feature_mins[i]) / (d->feature_maxs[i] - d->feature_mins[i]);
+            diff = abs(diff)/NUM_FEATURES;
             compare_sum += diff;
         }
         if (compare_sum < min){
-                //std::cout << "old difference is " << min << std::endl;
-                //std::cout << "new difference is " << compare_sum << std::endl;
                 min = compare_sum;
                 min_name = name;
             }
     }
-
-    return min_name;
+    std::cout << "difference is " << min << std::endl;
+    if(min < 0.1){
+        return std::string(min_name);
+    } else {
+        return std::string("could not be matched");
+    }
 }

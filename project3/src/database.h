@@ -8,15 +8,10 @@
 #include <cstring>
 #include "opencv2/opencv.hpp"
 #include <string>
+#include "OR_pipeline.h"
 
 #define NUM_FEATURES 3
 
-struct Region_features{
-	std::vector<float> features;
-	// feature 0 is perfecnt filled
-	// feature 1 is bounding box ratio
-	// feature 2 is second order moment about central axis
-};
 
 struct Entry{
     Region_features features;
@@ -32,9 +27,11 @@ struct Database{
 };
 std::string classify_scaledEuclideanDistance( Database* d, Region_features newObjetFeatures);
 
+std::string classifyKNN(Database * d, Region_features newObjectFeatures, int k);
+
 void computeFeatureAverages(Database* d);
 
-Database* database_read(char* filename);
+void database_read(char* filename, Database* d);
 
 void database_write(char* filename, Database* d);
 
@@ -47,7 +44,6 @@ bool compareLow(std::pair<std::string, int> a, std::pair<std::string, int> b) ;
 
 bool compareHigh(std::pair<std::string, int> a, std::pair<std::string, int> b) ;
 
-std::string classifyKNN(Database * d, Region_features newObjectFeatures, int k);
 
 int pair_contains(std::string s, std::vector<std::pair<std::string, int>> frequencies);
 

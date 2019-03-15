@@ -37,9 +37,10 @@ int main(int argc, char *argv[]) {
    	strcpy(csv, argv[2]);
 
 	//import features database
-	Database* d;
-	d = database_read(csv);
-	
+	Database d;
+	std::cout << "reading into database" <<std::endl;
+	database_read(csv, &d);
+	std::cout <<"read database" <<std::endl;
 
     // directory shit
 	DIR *dirp;
@@ -50,7 +51,7 @@ int main(int argc, char *argv[]) {
 		std::cout << "directory does not exist" << std::endl;
 		return(-1);
 	}
-	
+	std::cout << "starting loop" << std::endl;
 
 	while( (dp = readdir(dirp)) != NULL){ // read the next image
 		//std::cout <<"in loop" << std::endl;
@@ -69,11 +70,12 @@ int main(int argc, char *argv[]) {
 
                 Entry e;
                 e.name = name.substr(0, found);
-                e.features = features[1];
-                database_addEntry(e, d);
+                e.features = features[0];
+                database_addEntry(e, &d);
 		}
 	}
-    database_write(csv, d);
+
+    database_write(csv, &d);
 
 	return(0);
 }

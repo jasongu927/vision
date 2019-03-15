@@ -13,7 +13,6 @@
 #include <dirent.h>
 #include <cstring>
 #include "opencv2/opencv.hpp"
-#include "database.h"
 
 
 struct point {
@@ -31,6 +30,13 @@ struct point {
 	}
 };
 
+struct Region_features{
+	std::vector<float> features;
+	point centroid;
+	// feature 0 is perfecnt filled
+	// feature 1 is bounding box ratio
+	// feature 2 is second order moment about central axis
+};
 
 struct Region_information{
 	std::vector<point> corners;
@@ -70,7 +76,7 @@ float getBoundingBoxRatio(std::vector<point> region_points, point centroid, floa
 
 float getSecondOrderMomentAboutCentralAxis(std::vector<point> region_points, float major_axis, point centroid);
 
-void drawRegionInformation(cv::Mat& src, cv::Mat&  dest, std::vector<Region_information>  region_information);
+void drawRegionInformation(cv::Mat& src, std::vector<Region_information>  region_information);
 
 
 #endif
